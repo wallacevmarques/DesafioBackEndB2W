@@ -95,7 +95,7 @@ public class StarwarsPlanetsAPI {
 			}
 			
 			//Sends response
-			return Response.ok().entity(planetsJSON.toString()).build();
+			return Response.ok().entity(planetsJSON.toString()).header("Content-Type", "application/json").build();
 		
 		} catch (Exception exception) {
 			
@@ -157,7 +157,7 @@ public class StarwarsPlanetsAPI {
 			planetJSON.put("number_of_films", planet.getInteger("number_of_films"));
 			
 			//Sends response
-			return Response.ok().entity(planetJSON.toString()).build();
+			return Response.ok().entity(planetJSON.toString()).header("Content-Type", "application/json").build();
 			
 		} catch (Exception exception) {
 			
@@ -236,7 +236,7 @@ public class StarwarsPlanetsAPI {
 			planetJSON.put("number_of_films", planet.getInteger("number_of_films"));
 			
 			//Closes connection and sends response
-			return Response.ok().entity(planetJSON.toString()).build();
+			return Response.ok().entity(planetJSON.toString()).header("Content-Type", "application/json").build();
 			
 		} catch (Exception exception) {
 			
@@ -407,6 +407,7 @@ public class StarwarsPlanetsAPI {
 			
 		} catch (Exception exception) {
 			
+			//Logs error and sends response
 			exception.printStackTrace();
 			return Response.serverError().build();
 			
