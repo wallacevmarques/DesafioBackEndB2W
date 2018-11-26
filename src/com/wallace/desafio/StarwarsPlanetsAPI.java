@@ -1,9 +1,5 @@
 package com.wallace.desafio;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Iterator;
 
 import javax.ws.rs.DELETE;
@@ -18,10 +14,7 @@ import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 
 import static com.mongodb.client.model.Filters.*;
@@ -37,12 +30,9 @@ public class StarwarsPlanetsAPI {
 	@Path("/listplanets")
 	public Response listPlanets() {
 		
-		//Opens connection with database
-		MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-		
-		//Gets the collection
-		MongoDatabase database = mongoClient.getDatabase("starwars");
-		MongoCollection<Document> collection = database.getCollection("planets");
+		//Opens connection with database and gets collection
+		MongoConnect mongoConnect = new MongoConnect();
+		MongoCollection<Document> collection = mongoConnect.connectDB();
 		
 		//Creates and initializes planet object
 		MongoIterable<Document> planetsTemp = null;
@@ -56,14 +46,14 @@ public class StarwarsPlanetsAPI {
 			
 			//Logs error, closes connection and sends response
 			exception.printStackTrace();
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.serverError().build();
 			
 		}
 		
 		//Copies found planets info and closes connection
 		Iterator<Document> planets = planetsTemp.iterator();
-		mongoClient.close();
+		mongoConnect.disconnectDB();
 		
 		//Verifies if there's a planet in the search result
 		if (!planets.hasNext()) {
@@ -114,12 +104,9 @@ public class StarwarsPlanetsAPI {
 	@Path("/searchbyname/{name}")
 	public Response searchName(@PathParam("name") String name) {
 		
-		//Opens connection with database
-		MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-		
-		//Gets the collection
-		MongoDatabase database = mongoClient.getDatabase("starwars");
-		MongoCollection<Document> collection = database.getCollection("planets");
+		//Opens connection with database and gets collection
+		MongoConnect mongoConnect = new MongoConnect();
+		MongoCollection<Document> collection = mongoConnect.connectDB();
 		
 		//Creates and initializes planet object
 		Document planet = null;
@@ -133,13 +120,13 @@ public class StarwarsPlanetsAPI {
 			
 			//Logs error, closes connection and sends response
 			exception.printStackTrace();
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.serverError().build();
 			
 		}
 		
 		//Closes connection with DB
-		mongoClient.close();
+		mongoConnect.disconnectDB();
 		
 		//Verifies if there's a planet in the search result
 		if (planet == null) {
@@ -176,12 +163,9 @@ public class StarwarsPlanetsAPI {
 	@Path("/searchbyid/{id}")
 	public Response searchID(@PathParam("id") String id) {
 		
-		//Opens connection with database
-		MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-		
-		//Gets the collection
-		MongoDatabase database = mongoClient.getDatabase("starwars");
-		MongoCollection<Document> collection = database.getCollection("planets");
+		//Opens connection with database and gets collection
+		MongoConnect mongoConnect = new MongoConnect();
+		MongoCollection<Document> collection = mongoConnect.connectDB();
 		
 		//Creates and initializes object id
 		ObjectId objectId = null;
@@ -195,7 +179,7 @@ public class StarwarsPlanetsAPI {
 			
 			//Logs error, closes connection and sends response
 			exception.printStackTrace();
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.noContent().build();
 			
 		}
@@ -212,13 +196,13 @@ public class StarwarsPlanetsAPI {
 			
 			//Logs error, closes connection and sends response
 			exception.printStackTrace();
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.serverError().build();
 			
 		}
 		
 		//Closes connection with DB
-		mongoClient.close();
+		mongoConnect.disconnectDB();
 
 		//Verifies if there's a planet in the search result
 		if (planet == null) {
@@ -255,12 +239,9 @@ public class StarwarsPlanetsAPI {
 	@Path("/deleteplanet/{id}")
 	public Response deletePlanet(@PathParam("id") String id) {
 		
-		//Opens connection with database
-		MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-		
-		//Gets the collection
-		MongoDatabase database = mongoClient.getDatabase("starwars");
-		MongoCollection<Document> collection = database.getCollection("planets");
+		//Opens connection with database and gets collection
+		MongoConnect mongoConnect = new MongoConnect();
+		MongoCollection<Document> collection = mongoConnect.connectDB();
 		
 		//Creates and initializes object id
 		ObjectId objectId = null;
@@ -274,7 +255,7 @@ public class StarwarsPlanetsAPI {
 			
 			//Logs error, closes connection and sends response
 			exception.printStackTrace();
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.noContent().build();
 			
 		}
@@ -290,14 +271,14 @@ public class StarwarsPlanetsAPI {
 			
 			//Logs error, closes connection and sends response
 			exception.printStackTrace();
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.serverError().build();
 			
 		}
 		
 		//Verifies if there's a planet in the search result
 		if (planet == null) {
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.noContent().build();
 		}
 		
@@ -308,13 +289,13 @@ public class StarwarsPlanetsAPI {
 			if(deleteResult.wasAcknowledged()) {
 				
 				//Closes connection and sends response
-				mongoClient.close();
+				mongoConnect.disconnectDB();
 				return Response.ok().build();
 				
 			} else {
 				
 				//Closes connection and sends response
-				mongoClient.close();
+				mongoConnect.disconnectDB();
 				return Response.serverError().build();
 				
 			}
@@ -323,7 +304,7 @@ public class StarwarsPlanetsAPI {
 			
 			//Closes connection and sends response
 			exception.printStackTrace();
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.serverError().build();
 			
 		}
@@ -338,40 +319,35 @@ public class StarwarsPlanetsAPI {
 	public Response addPlanet(String inputPlanetJSONString) {
 		
 		//Creates and initializes string to receive the response of HTTTP request
-		String responseString = null;
+		JSONArray planetsArray = new JSONArray();
+		String urlString = "https://swapi.co/api/planets/";
+		String responseString = null;		
 		
+		//Gets array of planets from SWAPI
 		try {
 			
-			//Opens connection and defines request headers
-			URL url = new URL("https://swapi.co/api/planets/");
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("GET");
-			connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-			connection.setRequestProperty("Accept", "application/json");
-		
-			//Verifies if expected response was obtained
-			int status = connection.getResponseCode();
-			if (status != 200) {
-				return Response.serverError().build();
+			while (urlString != null) {
+				
+				//Gets one response page
+				responseString = 
+						HTTPRequestFromURL.requestJSONFromURLString(urlString);
+				
+				//Parses response string to JSON
+				JSONObject jsonObjectResponse = new JSONObject(responseString);
+				
+				//Adds the planets of this response page to the planets array
+				JSONArray planetsArrayTemp = jsonObjectResponse.getJSONArray("results");
+				for (int i = 0; i < planetsArrayTemp.length(); i++) {
+					planetsArray.put(planetsArrayTemp.getJSONObject(i));
+				}
+				
+				//Goes to the next page
+				urlString = jsonObjectResponse.getString("next");
 			}
-			
-			//Reads response and convert it to string
-			BufferedReader responseBuffer = new BufferedReader(
-					  new InputStreamReader(connection.getInputStream()));
-			String responseLine;
-			StringBuffer response = new StringBuffer();
-			while ((responseLine = responseBuffer.readLine()) != null) {
-			    response.append(responseLine);
-			}
-			responseBuffer.close();
-			responseString = response.toString();
 			
 		} catch (Exception exception) {
-			
-			//Logs error and sends response
 			exception.printStackTrace();
 			return Response.serverError().build();
-			
 		}
 		
 		//Parses inputPlanet to JSONObject
@@ -386,10 +362,6 @@ public class StarwarsPlanetsAPI {
 		boolean planetExists = false;
 		JSONObject planet = new JSONObject();
 		try {
-			
-			//Gets array of planets from SWAPI
-			JSONObject jsonObjectResponse = new JSONObject(responseString);
-			JSONArray planetsArray = jsonObjectResponse.getJSONArray("results");
 			
 			//Verifies if there's a star wars planet with the name of the to be inserted one
 			int count = planetsArray.length();
@@ -418,13 +390,9 @@ public class StarwarsPlanetsAPI {
 			return Response.noContent().build();
 		}
 		
-		
-		//Opens connection with database
-		MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-		
-		//Gets the collection
-		MongoDatabase database = mongoClient.getDatabase("starwars");
-		MongoCollection<Document> collection = database.getCollection("planets");
+		//Opens connection with database and gets collection
+		MongoConnect mongoConnect = new MongoConnect();
+		MongoCollection<Document> collection = mongoConnect.connectDB();
 		
 		//Creates and initializes object of planet to be verified on DB
 		Document verifyPlanet = null;
@@ -438,14 +406,14 @@ public class StarwarsPlanetsAPI {
 			
 			//Closes connection and sends response
 			exception.printStackTrace();
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.serverError().build();
 			
 		}
 		
 		//Verifies if there's already a planet on DB with the name of the to be inserted one
 		if (verifyPlanet != null) {
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.ok().build();
 		}
 			
@@ -464,13 +432,13 @@ public class StarwarsPlanetsAPI {
 			collection.insertOne(newPlanet);
 			
 			//Closes and sends response
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			return Response.created(null).build();
 			
 		} catch (Exception e) {
 			
 			//Closes connection and sends response
-			mongoClient.close();
+			mongoConnect.disconnectDB();
 			e.printStackTrace();
 			return Response.serverError().build();
 			
