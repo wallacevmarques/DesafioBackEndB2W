@@ -1,4 +1,4 @@
-package com.wallace.desafio;
+package com.wallace.desafio.util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

@@ -1,4 +1,4 @@
-package com.wallace.desafio;
+package com.wallace.desafio.controller;
 
 import java.util.Iterator;
 
@@ -19,6 +19,8 @@ import com.mongodb.client.MongoIterable;
 
 import static com.mongodb.client.model.Filters.*;
 import com.mongodb.client.result.DeleteResult;
+import com.wallace.desafio.util.HTTPRequestFromURL;
+import com.wallace.desafio.util.MongoConnect;
 
 @Path("starwarsplanetsapi")
 public class StarwarsPlanetsAPI {
@@ -342,7 +344,11 @@ public class StarwarsPlanetsAPI {
 				}
 				
 				//Goes to the next page
-				urlString = jsonObjectResponse.getString("next");
+				if  (jsonObjectResponse.get("next").equals(null)) {
+					urlString = null;
+				} else {
+					urlString = jsonObjectResponse.getString("next");
+				}
 			}
 			
 		} catch (Exception exception) {
